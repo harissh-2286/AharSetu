@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-darkblue-950 text-slate-100 min-h-screen overflow-x-hidden font-sans;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(58, 80, 107, 0.15) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(11, 19, 43, 1) 0px, transparent 100%);
+    background-attachment: fixed;
+  }
+
+  /* Custom Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(6, 9, 19, 0.4);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.6);
+  }
+}
+
+@layer components {
+  /* Premium Glassmorphism Classes */
+  .glass-panel {
+    @apply backdrop-blur-lg bg-slate-900/45 border border-white/10 shadow-2xl;
+  }
+  
+  .glass-panel-glow {
+    @apply backdrop-blur-xl bg-slate-900/50 border border-emerald-500/15 shadow-[0_0_25px_-5px_rgba(16,185,129,0.15)];
+  }
+
+  .glass-input {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/55 focus:border-transparent transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md bg-slate-900/40 border border-white/10 hover:border-emerald-500/30 transition-all duration-300 rounded-2xl p-6 shadow-lg;
+  }
+
+  /* Custom Buttons */
+  .btn-primary {
+    @apply bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-[0_4px_20px_-2px_rgba(16,185,129,0.4)] hover:shadow-[0_4px_25px_0_rgba(16,185,129,0.6)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-300 flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 hover:bg-white/10 text-slate-100 font-semibold px-6 py-3 rounded-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2;
+  }
+
+  .btn-accent {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-slate-100 font-bold px-6 py-3 rounded-xl shadow-[0_4px_20px_-2px_rgba(37,99,235,0.4)] hover:shadow-[0_4px_25px_0_rgba(37,99,235,0.6)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2;
+  }
+
+  /* Shimmer / Glow Accessories */
+  .glow-dot {
+    @apply relative flex h-3.5 w-3.5;
+  }
+  .glow-dot-ring {
+    @apply animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75;
+  }
+  .glow-dot-center {
+    @apply relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500;
+  }
+  
+  .glow-dot-red-ring {
+    @apply animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75;
+  }
+  .glow-dot-red-center {
+    @apply relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500;
+  }
+}
+
+/* Custom Micro-Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px 5px rgba(16, 185, 129, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500;
+}
+.text-gradient-blue {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-teal-300 to-blue-500;
+}
+
+/* Toast/Alert Popups */
+.alert-in {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "aharsetu",
+  "version": "1.0.0",
+  "description": "AharSetu - A Smart Digital Platform for Surplus Food Recovery and Hunger Alleviation",
+  "main": "server/server.js",
+  "scripts": {
+    "install-all": "npm install && npm install --prefix client && npm install --prefix server",
+    "server": "node server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "start.bat"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
