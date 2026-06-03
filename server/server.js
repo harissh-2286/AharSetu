@@ -10,7 +10,30 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkeyforaharsetu';
 
 // Enable middlewares
-app.use(cors());
+const allowedOrigins = [
+  'https://ahar-setu-seven.vercel.app',
+  'https://aharsetu.onrender.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000'
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps, curl, or same server)
+    if (!origin) return callback(null, true);
+    // Allow any vercel.app or onrender.com subdomain (for previews and deployment)
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(origin) ||
+      /\.onrender\.com$/.test(origin);
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Import Mongoose Models
@@ -269,7 +292,8 @@ app.post('/api/auth/register', async (req, res) => {
       
       const resUser = user.toObject();
       delete resUser.password;
-      res.status(201).json({ token, user: { id: resUser._id, ...resUser } });
+      // Normalize: ensure both id and _id available for client
+      res.status(201).json({ token, user: { id: String(resUser._id), _id: String(resUser._id), ...resUser } });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
@@ -314,7 +338,8 @@ app.post('/api/auth/login', async (req, res) => {
       const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
       const resUser = user.toObject();
       delete resUser.password;
-      res.json({ token, user: { id: resUser._id, ...resUser } });
+      // Normalize: ensure both id and _id available for client
+      res.json({ token, user: { id: String(resUser._id), _id: String(resUser._id), ...resUser } });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }

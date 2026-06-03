@@ -6,10 +6,11 @@ seedMockDatabase();
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 let isBackendOnline = false;
 
-// Dynamic API connectivity test with real browser-compatible timeout
-const checkServerHealth = async () => {
+// Dynamic API connectivity test - increased timeout for Render.com free tier cold starts (50s+)
+const checkServerHealth = async (retryCount = 0) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 1500);
+  // Give Render free tier up to 8s per attempt to respond
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
     const res = await fetch(`${BACKEND_URL.replace('/api', '')}/health`, {
@@ -19,15 +20,22 @@ const checkServerHealth = async () => {
     clearTimeout(timeoutId);
     if (res.ok) {
       isBackendOnline = true;
-      console.log('🔗 Connected to Express Server at Port 5000. Operating in Live Full-Stack mode.');
+      console.log('🔗 Connected to Express Server. Operating in Live Full-Stack mode.');
     }
   } catch (err) {
     clearTimeout(timeoutId);
-    isBackendOnline = false;
-    console.log('💾 Express Server offline. Operating in High-Fidelity Local Mock mode.');
+    // Render free tier spins down — retry up to 2 more times with a delay
+    if (retryCount < 2) {
+      console.log(`⏳ Backend not ready yet (attempt ${retryCount + 1}/3). Retrying in 5s...`);
+      setTimeout(() => checkServerHealth(retryCount + 1), 5000);
+    } else {
+      isBackendOnline = false;
+      console.log('💾 Backend offline. Operating in High-Fidelity Local Mock mode.');
+    }
   }
 };
 checkServerHealth();
+
 
 // Helper to interact with Mock Local DB
 const getMockData = (key) => JSON.parse(localStorage.getItem(key)) || [];
@@ -43,7 +51,13 @@ export const api = {
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) throw new Error((await res.json()).message || 'Login failed');
-      return await res.json();
+      const data = await res.json();
+      // Normalize: backend may return _id instead of id
+      const sessionUser = { ...data.user, id: data.user.id || data.user._id };
+      delete sessionUser.password;
+      sessionStorage.setItem('aharsetu_token', data.token);
+      sessionStorage.setItem('aharsetu_user', JSON.stringify(sessionUser));
+      return { token: data.token, user: sessionUser };
     } else {
       // Local Authentication Intercept
       const users = getMockData('aharsetu_users');
@@ -66,7 +80,13 @@ export const api = {
         body: JSON.stringify(userData)
       });
       if (!res.ok) throw new Error((await res.json()).message || 'Registration failed');
-      return await res.json();
+      const data = await res.json();
+      // Normalize: backend may return _id instead of id
+      const sessionUser = { ...data.user, id: data.user.id || data.user._id };
+      delete sessionUser.password;
+      sessionStorage.setItem('aharsetu_token', data.token);
+      sessionStorage.setItem('aharsetu_user', JSON.stringify(sessionUser));
+      return { token: data.token, user: sessionUser };
     } else {
       const users = getMockData('aharsetu_users');
       if (users.find(u => u.email === userData.email)) {

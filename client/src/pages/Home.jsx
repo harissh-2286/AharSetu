@@ -6,9 +6,32 @@ import FoodCard from '../components/FoodCard';
 import { Heart, Utensils, Users, TrendingUp, Truck, Search, ShieldCheck, ArrowRight, Star, ChevronDown, ChevronUp, Send, MapPin, Phone, Mail, Sparkles, HandHeart, Building2, Clock } from 'lucide-react';
 
 const Home = () => {
-  const { donations, feedback, claimFood, user } = useApp();
+  const { donations, requests, feedback, claimFood, user } = useApp();
   const [activeFaq, setActiveFaq] = useState(null);
   const availableDonations = donations.filter(d => d.status === 'available');
+
+  // Compute real stats from actual data
+  const totalMealsShared = donations
+    .filter(d => d.status === 'delivered' || d.status === 'claimed' || d.status === 'picked_up')
+    .reduce((acc, d) => acc + (parseInt(d.quantity) || 0), 0);
+
+  // Unique donors + receivers + volunteers from donations data
+  const uniqueDonorIds = new Set(donations.map(d => d.donorId).filter(Boolean));
+  const uniqueReceiverIds = new Set(donations.map(d => d.claimedByReceiverId).filter(Boolean));
+  const uniqueVolunteerIds = new Set(donations.map(d => d.assignedVolunteerId).filter(Boolean));
+  const activeUsersCount = uniqueDonorIds.size + uniqueReceiverIds.size + uniqueVolunteerIds.size || donations.length;
+
+  // NGO partners: unique receiver orgs from requests
+  const ngoPartnersCount = new Set(requests.map(r => r.receiverId || r.organizationName).filter(Boolean)).size || requests.length;
+
+  // Food saved in kg: estimate 0.4 kg per meal
+  const foodSavedKg = Math.round(totalMealsShared * 0.4);
+
+  // Show real numbers if data is loaded, otherwise fall back to sensible defaults
+  const statMeals = totalMealsShared > 0 ? totalMealsShared : 0;
+  const statUsers = activeUsersCount > 0 ? activeUsersCount : 0;
+  const statNGOs = ngoPartnersCount > 0 ? ngoPartnersCount : 0;
+  const statKg = foodSavedKg > 0 ? foodSavedKg : 0;
 
   const faqs = [
     { q: 'How does AharSetu work?', a: 'AharSetu connects food donors (restaurants, hotels, individuals) with receivers (shelters, NGOs) through a volunteer logistics network. Donors post surplus food, receivers claim it, and verified volunteers handle the pickup and delivery.' },
@@ -109,10 +132,10 @@ const Home = () => {
       <section className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <StatsCard icon={<Utensils className="h-6 w-6 text-emerald-400" />} label="Meals Shared" value={15240} suffix="+" color="emerald" />
-            <StatsCard icon={<Users className="h-6 w-6 text-sky-400" />} label="Active Users" value={2500} suffix="+" color="sky" />
-            <StatsCard icon={<Building2 className="h-6 w-6 text-amber-400" />} label="NGO Partners" value={48} color="amber" />
-            <StatsCard icon={<TrendingUp className="h-6 w-6 text-violet-400" />} label="Food Saved (kg)" value={8500} suffix="+" color="violet" />
+            <StatsCard icon={<Utensils className="h-6 w-6 text-emerald-400" />} label="Meals Shared" value={statMeals} suffix="+" color="emerald" />
+            <StatsCard icon={<Users className="h-6 w-6 text-sky-400" />} label="Active Users" value={statUsers} suffix="+" color="sky" />
+            <StatsCard icon={<Building2 className="h-6 w-6 text-amber-400" />} label="NGO Partners" value={statNGOs} color="amber" />
+            <StatsCard icon={<TrendingUp className="h-6 w-6 text-violet-400" />} label="Food Saved (kg)" value={statKg} suffix="+" color="violet" />
           </div>
         </div>
       </section>
